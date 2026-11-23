@@ -1,0 +1,247 @@
+$ = id => document.getElementById(id);
+
+const clubs = [
+
+  'Chelsea', 'Arsenal', 'Liverpool', 'Manchester City',
+
+  'Manchester United', 'Real Madrid', 'Barcelona', 'Atlético Madrid',
+
+  'Bayern Munich', 'Borussia Dortmund', 'Paris Saint-Germain',
+
+  'Inter Milan', 'AC Milan', 'Juventus'
+
+];
+
+const nations = [
+
+  'Egypt', 'Argentina', 'Brazil', 'France', 'Germany', 'Spain',
+
+  'Portugal', 'England', 'Netherlands', 'Morocco', 'Japan',
+
+  'USA', 'Mexico', 'Senegal', 'Croatia'
+
+];
+
+let mode = 'clubs';
+
+let team = '';
+
+let round = 1;
+
+let score = 0;
+
+let saves = 0;
+
+let locked = false;
+
+document.querySelectorAll('[data-mode]').forEach(button => {
+
+  button.addEventListener('click', () => chooseMode(button.dataset.mode));
+
+});
+
+function chooseMode(selectedMode) {
+
+  mode = selectedMode;
+
+  $('home').classList.remove('hidden');
+
+  $('teamPicker').classList.remove('hidden');
+
+  $('pickerLabel').textContent =
+
+    mode === 'clubs' ? 'CHOOSE YOUR CLUB' : 'CHOOSE YOUR COUNTRY';
+
+  const teams = mode === 'clubs' ? clubs : nations;
+
+  $('team').innerHTML = teams
+
+    .map(name => `<option value="${name}">${name}</option>`)
+
+    .join('');
+
+  $('teamPicker').scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+}
+
+$('back').addEventListener('click', () => {
+
+  $('teamPicker').classList.add('hidden');
+
+});
+
+$('play').addEventListener('click', () => {
+
+  team = $('team').value;
+
+  $('home').classList.add('hidden');
+
+  $('result').classList.add('hidden');
+
+  $('game').classList.remove('hidden');
+
+  $('modeLabel').textContent = mode === 'clubs' ? 'CLUB MODE' : 'WORLD CUP';
+
+  $('chosenTeam').textContent = team;
+
+  $('footTeam').textContent = team;
+
+  round = 1;
+
+  score = 0;
+
+  saves = 0;
+
+  resetKick();
+
+});
+
+function resetKick() {
+
+  locked = false;
+
+  $('round').textContent = round;
+
+  $('you').textContent = score;
+
+  $('keeperScore').textContent = saves;
+
+  $('message').textContent = 'Choose where to shoot!';
+
+  $('controls').classList.remove('hidden');
+
+  $('nextControls').classList.add('hidden');
+
+  $('keeper').style.left = '50%';
+
+  $('ball').style.left = '50%';
+
+  $('ball').style.top = '54%';
+
+  $('ball').style.opacity = '1';
+
+}
+
+document.querySelectorAll('[data-shot]').forEach(button => {
+
+  button.addEventListener('click', () => shoot(button.dataset.shot));
+
+});
+
+function shoot(direction) {
+
+  if (locked) return;
+
+  locked = true;
+
+  $('controls').classList.add('hidden');
+
+  $('player').classList.add('kicking');
+
+  const dive = ['left', 'center', 'right'][Math.floor(Math.random() * 3)];
+
+  $('keeper').style.left =
+
+    dive === 'left' ? '20%' : dive === 'right' ? '80%' : '50%';
+
+  $('ball').style.left =
+
+    direction === 'left' ? '28%' : direction === 'right' ? '72%' : '50%';
+
+  $('ball').style.top = direction === 'center' ? '19%' : '27%';
+
+  window.setTimeout(() => {
+
+    $('player').classList.remove('kicking');
+
+    if (direction === dive) {
+
+      saves++;
+
+      $('message').textContent = '🧤 SAVED! The goalkeeper got there.';
+
+    } else {
+
+      score++;
+
+      $('message').textContent = '⚽ GOAL! Brilliant finish!';
+
+    }
+
+    $('you').textContent = score;
+
+    $('keeperScore').textContent = saves;
+
+    $('nextControls').classList.remove('hidden');
+
+    $('next').textContent = round === 5 ? 'FULL-TIME RESULT' : 'NEXT KICK';
+
+  }, 620);
+
+}
+
+$('next').addEventListener('click', () => {
+
+  if (round < 5) {
+
+    round++;
+
+    resetKick();
+
+  } else {
+
+    finish();
+
+  }
+
+});
+
+function finish() {
+
+  $('game').classList.add('hidden');
+
+  $('result').classList.remove('hidden');
+
+  $('resultTitle').textContent =
+
+    score > saves
+
+      ? (mode === 'world' ? 'WORLD CUP CHAMPIONS!' : 'CLUB CHAMPIONS!')
+
+      : score === saves
+
+        ? 'IT’S A DRAW!'
+
+        : 'GOOD TRY!';
+
+  $('resultText').textContent =
+
+    `${team}: ${score} – ${saves}. ` +
+
+    (score > saves ? 'You won the shootout!' : 'Come back and try again!');
+
+}
+
+$('again').addEventListener('click', () => {
+
+  $('result').classList.add('hidden');
+
+  $('game').classList.remove('hidden');
+
+  round = 1;
+
+  score = 0;
+
+  saves = 0;
+
+  resetKick();
+
+});
+
+$('homeBtn').addEventListener('click', () => {
+
+  $('result').classList.add('hidden');
+
+  $('home').classList.remove('hidden');
+
+  $('teamPicker').classList.add('hidden');
