@@ -245,3 +245,4 @@ $('homeBtn').addEventListener('click', () => {
   $('home').classList.remove('hidden');
 
   $('teamPicker').classList.add('hidden');
+  });
